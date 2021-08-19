@@ -226,7 +226,9 @@ def _initialize(models, optimizers, properties, num_losses=1, cast_model_outputs
 
     _amp_state.loss_scalers = []
     for _ in range(num_losses):
+        print(f'.. Warning! You modify the loss scale window from default 2000 to {properties.scale_window}')
         _amp_state.loss_scalers.append(LossScaler(properties.loss_scale,
+                                                  scale_window=properties.scale_window,
                                                   min_loss_scale=_amp_state.min_loss_scale,
                                                   max_loss_scale=_amp_state.max_loss_scale))
 

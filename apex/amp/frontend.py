@@ -18,6 +18,7 @@ class Properties(object):
             "patch_torch_functions" : False,
             "keep_batchnorm_fp32" : None,
             "master_weights" : None,
+            "scale_window" : 2000,
             "loss_scale" : 1.0,
             # Reserved for future functionality
             # "fused_optimizer" : False,
@@ -205,6 +206,7 @@ def initialize(
     cast_model_outputs=None,
     num_losses=1,
     verbosity=1,
+    scale_window=2000,
     min_loss_scale=None,
     max_loss_scale=2.**24
     ):
@@ -350,6 +352,8 @@ def initialize(
         _amp_state.opt_properties.master_weights = master_weights
     if loss_scale is not None:
         _amp_state.opt_properties.loss_scale = loss_scale
+    if scale_window is not None:
+        _amp_state.opt_properties.scale_window = scale_window
 
     maybe_print("After processing overrides, optimization options are:", True)
     for k, v in _amp_state.opt_properties.options.items():

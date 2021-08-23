@@ -54,6 +54,7 @@ class LossScaler(object):
         self._unskipped = 0
         self._has_overflow = False
         self._overflow_buf = torch.cuda.IntTensor([0])
+        self._has_overflow_lasttime = False
         if multi_tensor_applier.available:
             import amp_C
             LossScaler.has_fused_kernel = multi_tensor_applier.available
@@ -201,12 +202,18 @@ class LossScaler(object):
 
         if self._has_overflow and self.dynamic:
             should_skip = True
-            if(self._min_loss_scale):
-                self._loss_scale = max(self._min_loss_scale, self._loss_scale/2.)
+            if self._has_overflow_lasttime:
+                if(self._min_loss_scale):
+                    self._loss_scale = max(self._min_loss_scale, self._loss_scale/2.)
+                else:
+                    self._loss_scale = self._loss_scale/2.
+                self._has_overflow_lasttime = False
             else:
-                self._loss_scale = self._loss_scale/2.
+                self._has_overflow_lasttime = True
+                print(" Already Gradient Overflow, but do not reduce the loss scale this time! ")
             self._unskipped = 0
         else:
+            self._has_overflow_lasttime = False
             should_skip = False
             self._unskipped += 1
 
